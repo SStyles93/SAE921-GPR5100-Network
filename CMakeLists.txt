@@ -5,9 +5,11 @@ cmake_minimum_required (VERSION 3.8)
 
 # Name of the solution
 # TODO: Rename solution
-project ("solution-name")
+project ("Network")
 
 # Include sub-projects.
 # TODO: Rename project
-set(EXECUTABLE_CUSTOM_NAME "project-name")
-add_subdirectory ("project-name")
+set(EXECUTABLE_CUSTOM_NAME "echo_client")
+add_subdirectory ("echo_client")
+set(EXECUTABLE_CUSTOM_NAME "echo_server")
+add_subdirectory ("echo_server")
