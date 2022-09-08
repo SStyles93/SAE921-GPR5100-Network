@@ -13,3 +13,8 @@ set(EXECUTABLE_CUSTOM_NAME "echo_client")
 add_subdirectory ("echo_client")
 set(EXECUTABLE_CUSTOM_NAME "echo_server")
 add_subdirectory ("echo_server")
+
+set(EXECUTABLE_CUSTOM_NAME "game_client")
+add_subdirectory ("game_client")
+set(EXECUTABLE_CUSTOM_NAME "game_server")
+add_subdirectory ("game_server")

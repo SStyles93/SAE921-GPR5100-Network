@@ -1,7 +1,7 @@
 #include <iostream>
 #include "SFML/Network.hpp"
 
-//Client
+//Echo_Client
 int main()
 {
     sf::TcpSocket socket;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "SFML/Network.hpp"
 
-//Server
+//Echo_Server
 int main()
 {
     sf::TcpListener listener;
@@ -35,8 +35,6 @@ int main()
         {
             //Error
         }
-        //client.send(receivedData, sizeof(receivedData), receivedSize);
-        
     }
     
     std::cout << "Server has shut down" << std::endl;
