@@ -21,7 +21,7 @@ int main()
     //Client count to assign IDs to clients
     int clientCount = 0;
 
-#pragma region Connection (INIT)
+#pragma region INIT
 
     while (clientCount < 2)
     {
@@ -49,12 +49,15 @@ int main()
             }
         }
     }
+    //Send validation to clients for GAME PHASE
+    //TODO: Packet for validation (Ex: Packet>>INIT(type)>>Validation)
 
 #pragma endregion
-#pragma region Game
+#pragma region GAME
 
     while (true) 
     {
+        //TODO: Has to be a GAME(type) Packet
         sf::Packet canPlayPacket;
         bool player1Turn = true;
         bool canPlay = true;
