@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SFML/Network.hpp"
+#include <SFML/Network.hpp>
 #include <list>
 
 //Game_Server

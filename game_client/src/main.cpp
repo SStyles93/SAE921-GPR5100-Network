@@ -3,6 +3,7 @@
 #include <SFML/Network.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
+#include "Packet.h"
 
 //Game_Client
 int main()
@@ -13,7 +14,7 @@ int main()
     sf::Socket::Status status = socket.connect(sf::IpAddress::getLocalAddress(), 12345);
     socket.setBlocking(false);
 
-    bool gameStarted = false;
+    auto gameState = sts::PacketType::INIT;
 
     sf::RenderWindow window;
     sf::Font font;
@@ -54,9 +55,10 @@ int main()
 
     while (window.isOpen())
     {
-        //----------------------------------------------------------------------------------LOBBY PHASE
-        while (!gameStarted)
+        switch (gameState) 
         {
+            //----------------------------------------------------------------------------------LOBBY PHASE
+        case sts::PacketType::INIT :
 #pragma region Network
 
             //TODO: Receive a INIT(type) packet 
@@ -96,129 +98,133 @@ int main()
             window.display();
 
 #pragma endregion   
-        }
-
-        //----------------------------------------------------------------------------------GAME PHASE
-        bool canPlay = false;
-        
-        //-------------------------------------------------Other Client
-        while (!canPlay)
+            //----------------------------------------------------------------------------------GAME PHASE
+        case sts::PacketType::GAME: 
         {
+            bool canPlay = false;
+
+            //-------------------------------------------------Other Client
+            if(!canPlay)
+            {
 #pragma region Network
 
-            sf::Packet canPlayPacket;
-            if (socket.receive(canPlayPacket) == sf::Socket::Status::Done)
-            {
-                canPlayPacket >> canPlay;
-                std::cout << "The client with port " << socket.getLocalPort() << " can play" << std::endl;
-            }
+                sf::Packet canPlayPacket;
+                if (socket.receive(canPlayPacket) == sf::Socket::Status::Done)
+                {
+                    canPlayPacket >> canPlay;
+                    std::cout << "The client with port " << socket.getLocalPort() << " can play" << std::endl;
+                }
 
 #pragma endregion
 #pragma region Event
 
-            sf::Event event;
+                sf::Event event;
 
-            while (window.pollEvent(event))
-            {
-                // Windows events -------------------------------------------------------------------------------
-                if (event.type == sf::Event::Closed)
+                while (window.pollEvent(event))
                 {
-                    window.close();
-                    return EXIT_SUCCESS;
+                    // Windows events -------------------------------------------------------------------------------
+                    if (event.type == sf::Event::Closed)
+                    {
+                        window.close();
+                        return EXIT_SUCCESS;
+                    }
+                    if (event.type == sf::Event::Resized)
+                    {
+                        auto view = window.getView();
+                        view.setSize(event.size.width, event.size.height);
+                        window.setView(view);
+                    }
                 }
-                if (event.type == sf::Event::Resized)
-                {
-                    auto view = window.getView();
-                    view.setSize(event.size.width, event.size.height);
-                    window.setView(view);
-                }
-            }
 
 #pragma endregion
 #pragma region Graphical
 
-            // Clear all elements from background
-            window.clear();
+                // Clear all elements from background
+                window.clear();
 
-            //TODO: Draw
+                //TODO: Draw
 
-            // Display all elements
-            window.display();
+                // Display all elements
+                window.display();
 
 #pragma endregion
-        }
+            }
 
-        //-------------------------------------------------This Client
-        while (canPlay)
-        {
+            //-------------------------------------------------This Client
+            if(canPlay)
+            {
 #pragma region Network
 
-            sf::Packet dataToSend;
-            std::string stringToSend;
-            std::cin >> stringToSend;
-            dataToSend << stringToSend;
-            if (socket.send(dataToSend) == sf::Socket::Done)
-            {
-                //Error
-                canPlay = false;
-            }
+                sf::Packet dataToSend;
+                std::string stringToSend;
+                std::cin >> stringToSend;
+                dataToSend << stringToSend;
+                if (socket.send(dataToSend) == sf::Socket::Done)
+                {
+                    //Error
+                    canPlay = false;
+                }
 
 #pragma endregion
 #pragma region Event
 
-            sf::Event event;
+                sf::Event event;
 
-            while (window.pollEvent(event))
-            {
-                // Windows events -------------------------------------------------------------------------------
-                if (event.type == sf::Event::Closed)
+                while (window.pollEvent(event))
                 {
-                    window.close();
-                    return EXIT_SUCCESS;
-                }
-                if (event.type == sf::Event::Resized)
-                {
-                    auto view = window.getView();
-                    view.setSize(event.size.width, event.size.height);
-                    window.setView(view);
-                }
-                // Keyboard events (TODO)
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1))
-                {
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2))
-                {
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3))
-                {
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4))
-                {
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter))
-                {
+                    // Windows events -------------------------------------------------------------------------------
+                    if (event.type == sf::Event::Closed)
+                    {
+                        window.close();
+                        return EXIT_SUCCESS;
+                    }
+                    if (event.type == sf::Event::Resized)
+                    {
+                        auto view = window.getView();
+                        view.setSize(event.size.width, event.size.height);
+                        window.setView(view);
+                    }
+                    // Keyboard events (TODO)
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1))
+                    {
+                    }
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2))
+                    {
+                    }
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3))
+                    {
+                    }
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4))
+                    {
+                    }
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter))
+                    {
 
+                    }
                 }
-            }
 
 #pragma endregion
 #pragma region Graphical
 
-            // Clear all elements from background
-            window.clear();
+                // Clear all elements from background
+                window.clear();
 
-            //TODO: Draw
+                //TODO: Draw
 
-            // Display all elements
-            window.display();
+                // Display all elements
+                window.display();
 
 #pragma endregion
+            }
+        }
+        //---------------------------------------------------------------------------------------END PHASE
+        case sts::PacketType::END:
+
+
         }
     }
-
 #pragma endregion
 
-    //---------------------------------------------------------------------------------------END PHASE
-
     return EXIT_SUCCESS;
+
 }
