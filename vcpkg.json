@@ -1,8 +1,5 @@
 {
   "name": "network",
   "version-string": "0.1.0",
-  "dependencies": [
-    "sfml",
-    "box2d"
-  ]
+  "dependencies": [ "sfml", "imgui-sfml", "imgui" ]
 }
