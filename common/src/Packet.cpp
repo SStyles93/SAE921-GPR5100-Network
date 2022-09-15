@@ -21,14 +21,36 @@ sf::Packet& sts::operator >>(sf::Packet& packet, sts::Packet& p)
 
 sts::GamePacket::GamePacket() {}
 
-sts::GamePacket::GamePacket(sts::PlayerAction action) : action(action) {}
+sts::GamePacket::GamePacket(PlayerAction action) : action(action) {}
 
 
-sf::Packet& operator <<(sf::Packet& packet, const sts::GamePacket& p) 
+sf::Packet& sts::operator <<(sf::Packet& packet, const sts::GamePacket& p) 
 {
+	const auto action = static_cast<int>(p.action);
+	return packet << action;
+}
+sf::Packet& sts::operator >>(sf::Packet& packet, sts::GamePacket& p) 
+{
+	int action = 0;
+	packet >> action;
+	p.action = static_cast<sts::PlayerAction>(action);
+	return packet;
+}
+
+sts::EndPacket::EndPacket() {}
+
+sts::EndPacket::EndPacket(sts::Result state) : result(state){}
+
+sf::Packet& sts::operator <<(sf::Packet& packet, const sts::EndPacket& p) 
+{
+	const auto state = static_cast<int>(p.result);
+	return packet << state;
 
 }
-sf::Packet& operator >>(sf::Packet& packet, sts::GamePacket& p) 
+sf::Packet& sts::operator >>(sf::Packet& packet, sts::EndPacket& p) 
 {
-
+	int state = 0;
+	packet >> state;
+	p.result = static_cast<sts::Result>(state);
+	return packet;
 }

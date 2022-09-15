@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Network.hpp>
 #include "PlayerAction.h"
+#include "Result.h"
 
 namespace sts 
 {
@@ -27,11 +28,21 @@ namespace sts
 	{
 	public:
 		GamePacket();
-		GamePacket(sts::PlayerAction);
+		GamePacket(PlayerAction action);
 
 		sts::PlayerAction action = sts::PlayerAction::HAND;
 	};
 	sf::Packet& operator <<(sf::Packet& packet, const GamePacket& p);
 	sf::Packet& operator >>(sf::Packet& packet, GamePacket& p);
 
+	class EndPacket : public Packet
+	{
+	public:
+		EndPacket();
+		EndPacket(sts::Result result);
+
+		sts::Result result = sts::Result::NONE;
+	};
+	sf::Packet& operator <<(sf::Packet& packet, const EndPacket& p);
+	sf::Packet& operator >>(sf::Packet& packet, EndPacket& p);
 }
