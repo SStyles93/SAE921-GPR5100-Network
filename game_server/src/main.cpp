@@ -4,6 +4,143 @@
 #include "Packet.h"
 #include "ServerState.h"
 
+void GameSolver(sts::PlayerAction player1Action, sts::PlayerAction player2Action, sts::Result& player1Result, sts::Result& player2Result) 
+{
+	switch (player1Action) 
+	{
+	case sts::PlayerAction::ROCK:
+		switch (player2Action)
+		{
+		case sts::PlayerAction::ROCK:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		case sts::PlayerAction::PAPER:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::CISORS:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::HAND:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::STUMP:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		default:
+			break;
+		}
+	case sts::PlayerAction::PAPER:
+		switch (player2Action)
+		{
+		case sts::PlayerAction::ROCK:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::PAPER:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		case sts::PlayerAction::CISORS:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::HAND:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::STUMP:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		default:
+			break;
+		}
+	case sts::PlayerAction::CISORS:
+		switch (player2Action)
+		{
+		case sts::PlayerAction::ROCK:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::PAPER:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::CISORS:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		case sts::PlayerAction::HAND:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::STUMP:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		default:
+			break;
+		}
+	case sts::PlayerAction::HAND:
+		switch (player2Action)
+		{
+		case sts::PlayerAction::ROCK:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::PAPER:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::CISORS:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::HAND:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		case sts::PlayerAction::STUMP:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		default:
+			break;
+		}
+	case sts::PlayerAction::STUMP:
+		switch (player2Action)
+		{
+		case sts::PlayerAction::ROCK:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::PAPER:
+			player1Result = sts::Result::LOST;
+			player2Result = sts::Result::WON;
+			break;
+		case sts::PlayerAction::CISORS:
+			player1Result = sts::Result::WON;
+			player2Result = sts::Result::LOST;
+			break;
+		case sts::PlayerAction::HAND:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		case sts::PlayerAction::STUMP:
+			player1Result = sts::Result::DRAW;
+			player2Result = sts::Result::DRAW;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 //Game_Server
 int main()
 {
@@ -30,9 +167,7 @@ int main()
 	sts::PlayerAction p2Action = sts::PlayerAction::NONE;
 	sts::Result p1Result = sts::Result::NONE;
 	sts::Result p2Result = sts::Result::NONE;
-	int actionCount = 0;
-	int returnCount = 0;
-	bool hasWon = false;
+	int receptionCount = 0;
 
 	while (true)
 	{
@@ -67,24 +202,19 @@ int main()
 						sts::Packet initStatePacket(sts::PacketType::INIT);
 						statePacket << initStatePacket;
 
-						if (clients[0].send(statePacket) != sf::Socket::Done)
+						if (clients[0].send(statePacket) == sf::Socket::Done)
 						{
-							std::cout << "Packet not received from" << clients[0].getRemotePort() << std::endl;
+							std::cout << "Server WAITING_FOR_PLAYERS, sent\n";
 						}
 						else 
 						{
-							std::cout << "Server PLAYER_MOVE sent\n";
 						}
 
 						statePacket.clear();
 						statePacket << initStatePacket;
-						if (clients[1].send(statePacket) != sf::Socket::Done)
+						if (clients[1].send(statePacket) == sf::Socket::Done)
 						{
-							std::cout << "Packet not received from" << clients[1].getRemotePort() << std::endl;
-						}
-						else
-						{
-							std::cout << "Server PLAYER_MOVE sent\n";
+							std::cout << "Server WAITING_FOR_PLAYERS, sent\n";
 						}
 					}
 				}
@@ -101,7 +231,7 @@ int main()
 						{
 							packet >> gamePacket;
 							p1Action = gamePacket.action;
-							actionCount++;
+							receptionCount++;
 						
 							std::cout << "Server PLAYER_MOVE received\n";
 						
@@ -113,44 +243,34 @@ int main()
 						{
 							packet >> gamePacket;
 							p2Action = gamePacket.action;
-							actionCount++;
+							receptionCount++;
 
 							std::cout << "Server PLAYER_MOVE received\n";
 
 						}
 					}
 				}
-				if (actionCount >= 2)
+				if (receptionCount >= 2)
 				{
 					serverState = sts::ServerState::RESOLVING;
-					actionCount = 0;
+					receptionCount = 0;
 
 					statePacket.clear();
 					sts::Packet gameStatePacket(sts::PacketType::GAME);
 					statePacket << gameStatePacket;
 
-					if (clients[0].send(statePacket) != sf::Socket::Done)
+					if (clients[0].send(statePacket) == sf::Socket::Done)
 					{
-						std::cout << "Packet not received from" << clients[0].getRemotePort() << std::endl;
-					}
-					else
-					{
-						std::cout << "Server RESOLVING sent\n";
+						std::cout << "Server PLAYER_MOVE sent\n";
 					}
 
 					statePacket.clear();
 					statePacket << gameStatePacket;
-					if (clients[1].send(statePacket) != sf::Socket::Done)
+					if (clients[1].send(statePacket) == sf::Socket::Done)
 					{
-						std::cout << "Packet not received from" << clients[1].getRemotePort() << std::endl;
-					}
-					else
-					{
-						std::cout << "Server RESOLVING sent\n";
+						std::cout << "Server PLAYER_MOVE sent\n";
 					}
 				}
-				
-				
 				break;
 
 			case sts::ServerState::RESOLVING:
@@ -159,13 +279,12 @@ int main()
 				for (std::size_t i = 0; i < clients.size(); i++)
 				{
 					if (!selector.isReady(clients[i])) continue;
-
 					if (i == 0)
 					{
 						if (clients[i].receive(packet) == sf::Socket::Done)
 						{
 							packet.clear();
-							actionCount++;
+							receptionCount++;
 							std::cout << "Server RESOLVING received\n";
 						}
 					}
@@ -174,27 +293,26 @@ int main()
 						if (clients[i].receive(packet) == sf::Socket::Done)
 						{
 							packet.clear();
-							actionCount++;
+							receptionCount++;
 							std::cout << "Server RESOLVING received\n";
 
 						}
 					}
 				}
-				if (actionCount >= 2) 
+				if (receptionCount >= 2) 
 				{
 					//RESOLVE THE ACTIONS
-					p1Result = sts::Result::DRAW;
-					p2Result = sts::Result::DRAW;
-					std::cout << "Server RESOLUTION\n";
-					serverState = sts::ServerState::END;
+					GameSolver(p1Action, p2Action, p1Result, p2Result);
 
+					serverState = sts::ServerState::END;
+					receptionCount = 0;
 					
 					packet.clear();
 					endPacket.result = p1Result;
 					packet << endPacket;
 					if (clients[0].send(packet) == sf::Socket::Done)
 					{
-						std::cout << "Server END sent\n";
+						std::cout << "Server RESOLVING sent\n";
 					}
 						
 					packet.clear();
@@ -202,7 +320,7 @@ int main()
 					packet << endPacket;
 					if (clients[1].send(packet) == sf::Socket::Done)
 					{
-						std::cout << "Server END sent\n";
+						std::cout << "Server RESOLVING sent\n";
 					}
 				}
 				break;

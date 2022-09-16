@@ -25,33 +25,36 @@ int main()
 		std::cerr << "Can't find font.\n";
 	}
 
-	sf::Text text;
-	sf::Text initText1;
-	sf::Text initText2;
-	sf::Text endText;
 
+	sf::Text text;
 	text.setFont(font);
 	text.setFillColor(sf::Color::White);
 	text.setCharacterSize(50);
 	text.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.0f));
 
+	sf::Text initText1;
 	initText1.setFont(font);
 	initText1.setFillColor(sf::Color::White);
 	initText1.setCharacterSize(50);
 	initText1.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.0f));
 
+	sf::Text initText2;
 	initText2.setFont(font);
 	initText2.setFillColor(sf::Color::Red);
 	initText2.setCharacterSize(50);
 	initText2.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.1f));
-
-
-#pragma region Game
+	
+	sf::Text endText;
+	endText.setFont(font);
+	endText.setCharacterSize(50);
+	endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
 
 	sf::Packet packet;
+	
 	sts::Packet receivedPacket;
 	sts::GamePacket gamePacket;
 	sts::EndPacket endPacket;
+
 	sts::ClientState clientState = sts::ClientState::CONNECTING_TO_SERVER;
 	sts::Result result = sts::Result::NONE;
 	sts::PlayerAction otherPlayersAction = sts::PlayerAction::NONE;
@@ -232,27 +235,18 @@ int main()
 				switch (result)
 				{
 				case sts::Result::WON:
-					endText.setFont(font);
 					endText.setFillColor(sf::Color::Green);
-					endText.setCharacterSize(50);
 					endText.setString(sf::String("Yay ! You have won !"));
-					endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
 					break;
 
 				case sts::Result::LOST:
-					endText.setFont(font);
 					endText.setFillColor(sf::Color::Red);
-					endText.setCharacterSize(50);
 					endText.setString(sf::String("Too bad, maybe more luck next time ! ;)"));
-					endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
 					break;
 
 				case sts::Result::DRAW:
-					endText.setFont(font);
 					endText.setFillColor(sf::Color::Color(255, 165, 0, 255));
-					endText.setCharacterSize(50);
 					endText.setString(sf::String("DRAW"));
-					endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
 					break;
 
 				default:
