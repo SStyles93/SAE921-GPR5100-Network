@@ -23,14 +23,15 @@ int main()
 	auto serverState = sts::ServerState::WAITING_FOR_PLAYERS;
 
 	sf::Packet packet;
-	sf::Packet startGamePacket;
+	sf::Packet statePacket;
 	sts::GamePacket gamePacket;
 	sts::EndPacket endPacket;
-	sts::PlayerAction p1Action;
-	sts::PlayerAction p2Action;
-	sts::Result p1Result;
-	sts::Result p2Result;
+	sts::PlayerAction p1Action = sts::PlayerAction::NONE;
+	sts::PlayerAction p2Action = sts::PlayerAction::NONE;
+	sts::Result p1Result = sts::Result::NONE;
+	sts::Result p2Result = sts::Result::NONE;
 	int actionCount = 0;
+	int returnCount = 0;
 	bool hasWon = false;
 
 	while (true)
@@ -62,19 +63,28 @@ int main()
 
 					if (clientCount >= 2) {
 						serverState = sts::ServerState::PLAYERS_MOVE;
-						sts::Packet initPacket(sts::PacketType::INIT);
 
-						startGamePacket << initPacket;
-						if (clients[0].send(startGamePacket) != sf::Socket::Done)
+						sts::Packet initStatePacket(sts::PacketType::INIT);
+						statePacket << initStatePacket;
+
+						if (clients[0].send(statePacket) != sf::Socket::Done)
 						{
 							std::cout << "Packet not received from" << clients[0].getRemotePort() << std::endl;
 						}
+						else 
+						{
+							std::cout << "Server PLAYER_MOVE sent\n";
+						}
 
-						startGamePacket.clear();
-						startGamePacket << initPacket;
-						if (clients[1].send(startGamePacket) != sf::Socket::Done)
+						statePacket.clear();
+						statePacket << initStatePacket;
+						if (clients[1].send(statePacket) != sf::Socket::Done)
 						{
 							std::cout << "Packet not received from" << clients[1].getRemotePort() << std::endl;
+						}
+						else
+						{
+							std::cout << "Server PLAYER_MOVE sent\n";
 						}
 					}
 				}
@@ -91,14 +101,11 @@ int main()
 						{
 							packet >> gamePacket;
 							p1Action = gamePacket.action;
+							actionCount++;
+						
+							std::cout << "Server PLAYER_MOVE received\n";
+						
 						}
-						packet.clear();
-						packet << gamePacket;
-						if (clients[i].send(packet) == sf::Socket::Done)
-						{
-							//Packet was sent
-						}
-						actionCount++;
 					}
 					else if (i == 1)
 					{
@@ -106,52 +113,102 @@ int main()
 						{
 							packet >> gamePacket;
 							p2Action = gamePacket.action;
+							actionCount++;
+
+							std::cout << "Server PLAYER_MOVE received\n";
+
 						}
-						packet.clear();
-						packet << gamePacket;
-						if (clients[i].send(packet) == sf::Socket::Done)
-						{
-							//Packet was sent
-						}
-						actionCount++;
 					}
 				}
 				if (actionCount >= 2)
 				{
 					serverState = sts::ServerState::RESOLVING;
+					actionCount = 0;
+
+					statePacket.clear();
+					sts::Packet gameStatePacket(sts::PacketType::GAME);
+					statePacket << gameStatePacket;
+
+					if (clients[0].send(statePacket) != sf::Socket::Done)
+					{
+						std::cout << "Packet not received from" << clients[0].getRemotePort() << std::endl;
+					}
+					else
+					{
+						std::cout << "Server RESOLVING sent\n";
+					}
+
+					statePacket.clear();
+					statePacket << gameStatePacket;
+					if (clients[1].send(statePacket) != sf::Socket::Done)
+					{
+						std::cout << "Packet not received from" << clients[1].getRemotePort() << std::endl;
+					}
+					else
+					{
+						std::cout << "Server RESOLVING sent\n";
+					}
 				}
+				
+				
 				break;
 
 			case sts::ServerState::RESOLVING:
 
-				//SOLVE
 
-
-				break;
-
-			case sts::ServerState::END:
 				for (std::size_t i = 0; i < clients.size(); i++)
 				{
 					if (!selector.isReady(clients[i])) continue;
 
 					if (i == 0)
 					{
-						packet.clear();
-						endPacket.result = p1Result;
-						packet << endPacket;
-
+						if (clients[i].receive(packet) == sf::Socket::Done)
+						{
+							packet.clear();
+							actionCount++;
+							std::cout << "Server RESOLVING received\n";
+						}
 					}
 					else if (i == 1)
 					{
-						packet.clear();
-						endPacket.result = p2Result;
-						packet << endPacket;
-					}
-					if (clients[i].send(packet) != sf::Socket::Done) 
-					{
-						std::cerr << "result not sent to: " << clients[i].getRemotePort() << "\n";
+						if (clients[i].receive(packet) == sf::Socket::Done)
+						{
+							packet.clear();
+							actionCount++;
+							std::cout << "Server RESOLVING received\n";
+
+						}
 					}
 				}
+				if (actionCount >= 2) 
+				{
+					//RESOLVE THE ACTIONS
+					p1Result = sts::Result::DRAW;
+					p2Result = sts::Result::DRAW;
+					std::cout << "Server RESOLUTION\n";
+					serverState = sts::ServerState::END;
+
+					
+					packet.clear();
+					endPacket.result = p1Result;
+					packet << endPacket;
+					if (clients[0].send(packet) == sf::Socket::Done)
+					{
+						std::cout << "Server END sent\n";
+					}
+						
+					packet.clear();
+					endPacket.result = p2Result;
+					packet << endPacket;
+					if (clients[1].send(packet) == sf::Socket::Done)
+					{
+						std::cout << "Server END sent\n";
+					}
+				}
+				break;
+
+			case sts::ServerState::END:
+
 				break;
 			}
 		}

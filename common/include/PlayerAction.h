@@ -4,6 +4,7 @@ namespace sts
 {
 	enum class PlayerAction
 	{
+		NONE,
 		ROCK,
 		PAPER,
 		CISORS,

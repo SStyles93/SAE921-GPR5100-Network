@@ -30,7 +30,7 @@ namespace sts
 		GamePacket();
 		GamePacket(PlayerAction action);
 
-		sts::PlayerAction action = sts::PlayerAction::HAND;
+		sts::PlayerAction action = sts::PlayerAction::NONE;
 	};
 	sf::Packet& operator <<(sf::Packet& packet, const GamePacket& p);
 	sf::Packet& operator >>(sf::Packet& packet, GamePacket& p);

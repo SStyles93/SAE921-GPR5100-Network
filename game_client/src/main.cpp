@@ -50,13 +50,15 @@ int main()
 
 	sf::Packet packet;
 	sts::Packet receivedPacket;
+	sts::GamePacket gamePacket;
 	sts::EndPacket endPacket;
-	sts::GamePacket actionPacket;
 	sts::ClientState clientState = sts::ClientState::CONNECTING_TO_SERVER;
-	sts::Result result = sts::Result::DRAW;
+	sts::Result result = sts::Result::NONE;
+	sts::PlayerAction otherPlayersAction = sts::PlayerAction::NONE;
 
 	bool playerHasHand = true;
 	bool shouldSendPacket = false;
+	bool actionDone = false;
 	
 	while (window.isOpen())
 	{
@@ -76,10 +78,60 @@ int main()
 				view.setSize(event.size.width, event.size.height);
 				window.setView(view);
 			}
-			/*if (clientState == sts::ClientState::GAME) 
+			if (clientState == sts::ClientState::GAME) 
 			{
-
-			}*/
+				if (event.type == sf::Event::KeyPressed) 
+				{
+					if (event.key.code == sf::Keyboard::Num1) 
+					{
+						packet.clear();
+						gamePacket.action = sts::PlayerAction::ROCK;
+						packet << gamePacket;
+						shouldSendPacket = true;
+						initText1.setString("You have played ROCK");
+						std::cout << "KeyPressed! " << std::endl;
+					}
+					if (event.key.code == sf::Keyboard::Num2)
+					{
+						packet.clear();
+						gamePacket.action = sts::PlayerAction::PAPER;
+						packet << gamePacket;
+						shouldSendPacket = true;
+						initText1.setString("You have played PAPER");
+						std::cout << "KeyPressed! " << std::endl;
+					}
+					if (event.key.code == sf::Keyboard::Num3)
+					{
+						packet.clear();
+						gamePacket.action = sts::PlayerAction::CISORS;
+						packet << gamePacket;
+						shouldSendPacket = true;
+						initText1.setString("You have played CISORS");
+						std::cout << "KeyPressed! " << std::endl;
+					}
+					if (event.key.code == sf::Keyboard::Num4)
+					{
+						if (playerHasHand)
+						{
+							packet.clear();
+							gamePacket.action = sts::PlayerAction::HAND;
+							packet << gamePacket;
+							shouldSendPacket = true;
+							initText1.setString("You have played HAND");
+							std::cout << "KeyPressed! " << std::endl;
+						}
+						else
+						{
+							packet.clear();
+							gamePacket.action = sts::PlayerAction::STUMP;
+							packet << gamePacket;
+							shouldSendPacket = true;
+							initText1.setString("You have played STUMP");
+							std::cout << "KeyPressed! " << std::endl;
+						}
+					}
+				}
+			}
 		}
 
 		switch (clientState)
@@ -96,9 +148,8 @@ int main()
 			}
 			else if (status == sf::Socket::Error)
 			{
-				std::cerr << "A thing\n";
+				std::cerr << "An error has occured\n";
 			}
-
 			break;
 		}
 		case sts::ClientState::INIT:
@@ -110,6 +161,7 @@ int main()
 				{
 					clientState = sts::ClientState::GAME;
 				}
+				std::cout << "Client INIT received\n";
 			}
 
 			text.setString("Connection established with the server.\nWaiting for a second Player...");
@@ -121,126 +173,93 @@ int main()
 
 		case sts::ClientState::GAME:
 		{
+			// Clear all elements from background
+			window.clear();
+
+			//Check if packet is sent or not
+			if (shouldSendPacket && socket.send(packet) == sf::Socket::Done)
+			{
+				shouldSendPacket = false;
+				actionDone = true;
+				std::cout << "Client GAME sent\n";
+			}
+
+			if (actionDone) 
+			{
+				initText1.setColor(sf::Color::Green);
+				window.draw(initText1);
+			}
+			else 
+			{
+				//Draw instructions
+				initText1.setString(sf::String("You are playing ROCK - PAPER - CISORS - STUMP"));
+				initText2.setString(sf::String("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n"));
+				window.draw(initText1);
+				window.draw(initText2);
+			}
+			// Display all elements
+			window.display();
+
 			if (socket.receive(packet) == sf::Socket::Done)
 			{
 				packet >> receivedPacket;
 				if (receivedPacket.type == sts::PacketType::GAME)
 				{
 					clientState = sts::ClientState::END;
-				}
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
-			{
-				packet.clear();
-				actionPacket.action = sts::PlayerAction::ROCK;
-				packet << actionPacket;
-				shouldSendPacket = true;
-				initText1.setString("You have played ROCK");
-				std::cout << "KeyPressed! " << std::endl;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
-			{
-				packet.clear();
-				actionPacket.action = sts::PlayerAction::PAPER;
-				packet << actionPacket;
-				shouldSendPacket = true;
-				initText1.setString("You have played PAPER");
-				std::cout << "KeyPressed! " << std::endl;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3))
-			{
-				packet.clear();
-				actionPacket.action = sts::PlayerAction::CISORS;
-				packet << actionPacket;
-				shouldSendPacket = true;
-				initText1.setString("You have played CISORS");
-				std::cout << "KeyPressed! " << std::endl;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
-			{
-				if (playerHasHand)
-				{
-					packet.clear();
-					actionPacket.action = sts::PlayerAction::HAND;
-					packet << actionPacket;
 					shouldSendPacket = true;
-					initText1.setString("You have played HAND");
-					std::cout << "KeyPressed! " << std::endl;
 				}
-				else
-				{
-					packet.clear();
-					actionPacket.action = sts::PlayerAction::STUMP;
-					packet << actionPacket;
-					shouldSendPacket = true;
-					initText1.setString("You have played STUMP");
-					std::cout << "KeyPressed! " << std::endl;
-				}
+				std::cout << "Client GAME received\n";
 			}
 
-			//Check if packet was sent correctly if not continue sending
-			if (shouldSendPacket && socket.send(packet) == sf::Socket::Done)
-			{
-				shouldSendPacket = false;
-				clientState = sts::ClientState::END;
-			}
-			else
-			{
-				//if no packet sent yet, print options
-				initText1.setString(sf::String("You are playing ROCK - PAPER - CISORS - STUMP"));
-				initText2.setString(sf::String("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n"));
-			};
-
-			// Clear all elements from background
-			window.clear();
-			//Draw
-			window.draw(initText1);
-			window.draw(initText2);
-			// Display all elements
-			window.display();
 		}
 			break;
 
 		case sts::ClientState::END:
 		{
-			packet.clear();
-			if (socket.receive(packet) == sf::Socket::Done) 
+			if (shouldSendPacket && socket.send(packet) == sf::Socket::Done) 
+			{
+				shouldSendPacket = false;
+				packet.clear();
+				std::cout << "Client END packet sent\n";
+			}
+
+			if (socket.receive(packet) == sf::Socket::Done)
 			{
 				packet >> endPacket;
 				result = endPacket.result;
-			};
+				std::cout << "Client END received\n";
 
-			switch (result) 
-			{
-			case sts::Result::WON:
-				endText.setFont(font);
-				endText.setFillColor(sf::Color::Green);
-				endText.setCharacterSize(50);
-				endText.setString(sf::String("Yay ! You have won !"));
-				endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
-				break;
+				switch (result)
+				{
+				case sts::Result::WON:
+					endText.setFont(font);
+					endText.setFillColor(sf::Color::Green);
+					endText.setCharacterSize(50);
+					endText.setString(sf::String("Yay ! You have won !"));
+					endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
+					break;
 
-			case sts::Result::LOST:
-				endText.setFont(font);
-				endText.setFillColor(sf::Color::Red);
-				endText.setCharacterSize(50);
-				endText.setString(sf::String("Too bad, maybe more luck next time ! ;)"));
-				endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
-				break;
+				case sts::Result::LOST:
+					endText.setFont(font);
+					endText.setFillColor(sf::Color::Red);
+					endText.setCharacterSize(50);
+					endText.setString(sf::String("Too bad, maybe more luck next time ! ;)"));
+					endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
+					break;
 
-			case sts::Result::DRAW:
-				endText.setFont(font);
-				endText.setFillColor(sf::Color::Color(255, 165, 0, 255));
-				endText.setCharacterSize(50);
-				endText.setString(sf::String("DRAW"));
-				endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
-				break;
+				case sts::Result::DRAW:
+					endText.setFont(font);
+					endText.setFillColor(sf::Color::Color(255, 165, 0, 255));
+					endText.setCharacterSize(50);
+					endText.setString(sf::String("DRAW"));
+					endText.setPosition(sf::Vector2f(window.getSize().x * 0.0f, window.getSize().y * 0.5f));
+					break;
 
-			default:
-				endText.setString("Waiting for resolution...");
-				continue;
+				default:
+					endText.setString("???");
+					break;
+				}
 			}
-
 			window.clear();
 			window.draw(endText);
 			window.display();
