@@ -43,16 +43,21 @@ namespace sts
 
 		sf::Font m_font;
 
-		sf::Text m_text1;
-		sf::Text m_text2;
-		sf::Text m_text3;
-		sf::Text m_text4;
+		sf::Text m_scoreText;
+		sf::Text m_connectionText;
+		sf::Text m_infoText;
+		sf::Text m_actionText;
+		sf::Text m_resultText;
+		sf::Text m_opponentActionText;
 
 		sf::Event m_event;
 
 		bool m_playerHasHand = true;
 		bool m_shouldSendPacket = false;
 		bool m_actionDone = false;
+
+		int m_playerScore = 0;
+		int m_opponentScore = 0;
 
 	};
 }

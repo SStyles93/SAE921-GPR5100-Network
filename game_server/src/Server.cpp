@@ -33,6 +33,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		default:
 			break;
 		}
+		break;
 	case sts::PlayerAction::PAPER:
 		switch (player2Action)
 		{
@@ -59,6 +60,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		default:
 			break;
 		}
+		break;
 	case sts::PlayerAction::CISORS:
 		switch (player2Action)
 		{
@@ -85,6 +87,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		default:
 			break;
 		}
+		break;
 	case sts::PlayerAction::HAND:
 		switch (player2Action)
 		{
@@ -111,6 +114,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		default:
 			break;
 		}
+		break;
 	case sts::PlayerAction::STUMP:
 		switch (player2Action)
 		{
@@ -137,6 +141,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		default:
 			break;
 		}
+		break;
 	}
 }
 
@@ -285,11 +290,9 @@ int sts::Server::Update()
 					//RESOLVE THE ACTIONS
 					GameSolver(m_p1Action, m_p2Action, m_p1Result, m_p2Result);
 
-					m_serverState = sts::ServerState::END;
-					m_receptionCount = 0;
-
 					m_packet.clear();
 					m_endPacket.result = m_p1Result;
+					m_endPacket.opponentAction = m_p2Action;
 					m_packet << m_endPacket;
 					if (m_clients[0].send(m_packet) == sf::Socket::Done)
 					{
@@ -298,15 +301,70 @@ int sts::Server::Update()
 
 					m_packet.clear();
 					m_endPacket.result = m_p2Result;
+					m_endPacket.opponentAction = m_p1Action;
 					m_packet << m_endPacket;
 					if (m_clients[1].send(m_packet) == sf::Socket::Done)
 					{
 						std::cout << "Server RESOLVING sent\n";
 					}
+
+					m_serverState = sts::ServerState::END;
+					m_receptionCount = 0;
 				}
 				break;
 
 			case sts::ServerState::END:
+
+				for (std::size_t i = 0; i < m_clients.size(); i++)
+				{
+					if (!m_selector.isReady(m_clients[i])) continue;
+					if (i == 0)
+					{
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet.clear();
+							m_receptionCount++;
+							std::cout << "Server END received\n";
+						}
+					}
+					else if (i == 1)
+					{
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet.clear();
+							m_receptionCount++;
+							std::cout << "Server END received\n";
+
+						}
+					}
+				}
+				if (m_receptionCount >= 2) 
+				{
+					m_serverState = sts::ServerState::PLAYERS_MOVE;
+
+					sts::Packet initStatePacket(sts::PacketType::INIT);
+					
+					m_statePacket.clear();
+					m_statePacket << initStatePacket;
+					if (m_clients[0].send(m_statePacket) == sf::Socket::Done)
+					{
+						std::cout << "Server REPLAY, sent\n";
+					}
+
+					m_statePacket.clear();
+					m_statePacket << initStatePacket;
+					if (m_clients[1].send(m_statePacket) == sf::Socket::Done)
+					{
+						std::cout << "Server REPLAY, sent\n";
+					}
+
+					m_p1Action = sts::PlayerAction::NONE;
+					m_p2Action = sts::PlayerAction::NONE;
+					m_p1Result = sts::Result::NONE;
+					m_p2Result = sts::Result::NONE;
+
+					m_receptionCount = 0;
+				}
 
 				break;
 			}

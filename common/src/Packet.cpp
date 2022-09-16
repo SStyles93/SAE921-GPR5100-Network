@@ -39,18 +39,21 @@ sf::Packet& sts::operator >>(sf::Packet& packet, sts::GamePacket& p)
 
 sts::EndPacket::EndPacket() {}
 
-sts::EndPacket::EndPacket(sts::Result state) : result(state){}
+sts::EndPacket::EndPacket(sts::Result state, sts::PlayerAction opponentAction) : result(result), opponentAction(opponentAction) {}
 
 sf::Packet& sts::operator <<(sf::Packet& packet, const sts::EndPacket& p) 
 {
 	const auto state = static_cast<int>(p.result);
-	return packet << state;
-
+	const auto action = static_cast<int>(p.opponentAction);
+	return packet << state << action;
 }
-sf::Packet& sts::operator >>(sf::Packet& packet, sts::EndPacket& p) 
+sf::Packet& sts::operator >>(sf::Packet& packet, sts::EndPacket& p)
 {
 	int state = 0;
+	int opponentAction = 0;
 	packet >> state;
+	packet >> opponentAction;
 	p.result = static_cast<sts::Result>(state);
+	p.opponentAction = static_cast<sts::PlayerAction>(opponentAction);
 	return packet;
 }

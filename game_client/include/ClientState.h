@@ -8,6 +8,7 @@ namespace sts
 		INIT,
 		GAME,
 		END,
+		REPLAY
 	};
 }
 

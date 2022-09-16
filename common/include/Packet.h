@@ -39,9 +39,10 @@ namespace sts
 	{
 	public:
 		EndPacket();
-		EndPacket(sts::Result result);
+		EndPacket(sts::Result state, sts::PlayerAction opponentAction);
 
 		sts::Result result = sts::Result::NONE;
+		sts::PlayerAction opponentAction = sts::PlayerAction::NONE;
 	};
 	sf::Packet& operator <<(sf::Packet& packet, const EndPacket& p);
 	sf::Packet& operator >>(sf::Packet& packet, EndPacket& p);

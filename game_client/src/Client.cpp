@@ -22,24 +22,35 @@ void sts::Client::Init()
 	}
 
 	//Init texts
-	m_text1.setFont(m_font);
-	m_text1.setFillColor(sf::Color::White);
-	m_text1.setCharacterSize(50);
-	m_text1.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
+	m_infoText.setFont(m_font);
+	m_infoText.setFillColor(sf::Color::White);
+	m_infoText.setCharacterSize(50);
+	m_infoText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
+	m_infoText.setString("You are playing ROCK-PAPER-CISORS-HAND");
 
-	m_text2.setFont(m_font);
-	m_text2.setFillColor(sf::Color::White);
-	m_text2.setCharacterSize(50);
-	m_text2.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
+	m_connectionText.setFont(m_font);
+	m_connectionText.setFillColor(sf::Color::White);
+	m_connectionText.setCharacterSize(50);
+	m_connectionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
 
-	m_text3.setFont(m_font);
-	m_text3.setFillColor(sf::Color::Red);
-	m_text3.setCharacterSize(50);
-	m_text3.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.1f));
+	m_scoreText.setFont(m_font);
+	m_scoreText.setFillColor(sf::Color::White);
+	m_scoreText.setCharacterSize(50);
+	m_scoreText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.1f));
 
-	m_text4.setFont(m_font);
-	m_text4.setCharacterSize(50);
-	m_text4.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.5f));
+	m_actionText.setFont(m_font);
+	m_actionText.setFillColor(sf::Color::Red);
+	m_actionText.setCharacterSize(50);
+	m_actionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.2f));
+
+	m_opponentActionText.setFont(m_font);
+	m_opponentActionText.setFillColor(sf::Color::White);
+	m_opponentActionText.setCharacterSize(50);
+	m_opponentActionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.3f));
+
+	m_resultText.setFont(m_font);
+	m_resultText.setCharacterSize(50);
+	m_resultText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.4f));
 
 }
 
@@ -61,9 +72,9 @@ int sts::Client::Update()
 				view.setSize(m_event.size.width, m_event.size.height);
 				m_window.setView(view);
 			}
-			if (m_clientState == sts::ClientState::GAME)
+			if (m_event.type == sf::Event::KeyPressed)
 			{
-				if (m_event.type == sf::Event::KeyPressed)
+				if (m_clientState == sts::ClientState::GAME)
 				{
 					if (m_event.key.code == sf::Keyboard::Num1)
 					{
@@ -71,7 +82,7 @@ int sts::Client::Update()
 						m_gamePacket.action = sts::PlayerAction::ROCK;
 						m_packet << m_gamePacket;
 						m_shouldSendPacket = true;
-						m_text2.setString("You have played ROCK");
+						m_actionText.setString("You have played ROCK");
 						std::cout << "Key 1 Pressed! " << std::endl;
 					}
 					if (m_event.key.code == sf::Keyboard::Num2)
@@ -80,7 +91,7 @@ int sts::Client::Update()
 						m_gamePacket.action = sts::PlayerAction::PAPER;
 						m_packet << m_gamePacket;
 						m_shouldSendPacket = true;
-						m_text2.setString("You have played PAPER");
+						m_actionText.setString("You have played PAPER");
 						std::cout << "Key 2 Pressed! " << std::endl;
 					}
 					if (m_event.key.code == sf::Keyboard::Num3)
@@ -89,7 +100,7 @@ int sts::Client::Update()
 						m_gamePacket.action = sts::PlayerAction::CISORS;
 						m_packet << m_gamePacket;
 						m_shouldSendPacket = true;
-						m_text2.setString("You have played CISORS");
+						m_actionText.setString("You have played CISORS");
 						std::cout << "Key 3 Pressed! " << std::endl;
 					}
 					if (m_event.key.code == sf::Keyboard::Num4)
@@ -100,7 +111,7 @@ int sts::Client::Update()
 							m_gamePacket.action = sts::PlayerAction::HAND;
 							m_packet << m_gamePacket;
 							m_shouldSendPacket = true;
-							m_text2.setString("You have played HAND");
+							m_actionText.setString("You have played HAND");
 							std::cout << "Key 4 Pressed! " << std::endl;
 						}
 						else
@@ -109,9 +120,19 @@ int sts::Client::Update()
 							m_gamePacket.action = sts::PlayerAction::STUMP;
 							m_packet << m_gamePacket;
 							m_shouldSendPacket = true;
-							m_text2.setString("You have played STUMP");
+							m_actionText.setString("You have played STUMP");
 							std::cout << "Key 4 Pressed! " << std::endl;
 						}
+					}
+				}
+				if (m_clientState == sts::ClientState::END)
+				{
+					if (m_event.key.code == sf::Keyboard::Enter)
+					{
+						m_packet.clear();
+						m_shouldSendPacket = true;
+						m_clientState = sts::ClientState::REPLAY;
+						std::cout << "Key ENTER Pressed! " << std::endl;
 					}
 				}
 			}
@@ -119,7 +140,7 @@ int sts::Client::Update()
 
 		switch (m_clientState)
 		{
-
+			//If connected pass to INIT
 		case sts::ClientState::CONNECTING_TO_SERVER:
 		{
 			sf::Socket::Status status = m_socket.connect(sf::IpAddress::getLocalAddress(), 12345);
@@ -135,6 +156,7 @@ int sts::Client::Update()
 			}
 		}
 			break;
+			//INIT and wait for packet to go to GAME
 		case sts::ClientState::INIT:
 		{
 			if (m_socket.receive(m_packet) == sf::Socket::Done)
@@ -143,13 +165,15 @@ int sts::Client::Update()
 				if (m_receivedPacket.type == sts::PacketType::INIT)
 				{
 					m_clientState = sts::ClientState::GAME;
+					//RESET receivedPacket
+					m_receivedPacket.type = sts::PacketType::NONE;
 				}
 				std::cout << "Client INIT received\n";
 			}
 
-			m_text1.setString("Connection established with the server.\nWaiting for a second Player...");
+			m_connectionText.setString("Connection established with the server.\nWaiting for a second Player...");
 			m_window.clear();
-			m_window.draw(m_text1);
+			m_window.draw(m_connectionText);
 			m_window.display();
 		}
 			break;
@@ -168,17 +192,20 @@ int sts::Client::Update()
 
 			if (m_actionDone)
 			{
-				m_text2.setColor(sf::Color::Green);
-				m_window.draw(m_text2);
+				m_actionText.setColor(sf::Color::Green);
 			}
 			else
 			{
 				//Draw instructions
-				m_text2.setString(sf::String("You are playing ROCK - PAPER - CISORS - STUMP"));
-				m_text3.setString(sf::String("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n"));
-				m_window.draw(m_text2);
-				m_window.draw(m_text3);
+				m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n");
 			}
+
+			m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+			
+			m_window.draw(m_infoText);
+			m_window.draw(m_scoreText);
+			m_window.draw(m_actionText);
+
 			// Display all elements
 			m_window.display();
 
@@ -207,44 +234,76 @@ int sts::Client::Update()
 			if (m_socket.receive(m_packet) == sf::Socket::Done)
 			{
 				m_packet >> m_endPacket;
+				m_otherPlayersAction = m_endPacket.opponentAction;
 				m_result = m_endPacket.result;
 				std::cout << "Client END received\n";
 
 				switch (m_result)
 				{
 				case sts::Result::WON:
-					m_text4.setFillColor(sf::Color::Green);
-					m_text4.setString(sf::String("Yay ! You have won !"));
+					m_playerScore++;
+					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+					m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_resultText.setFillColor(sf::Color::Green);
+					m_resultText.setString(sf::String("Yay ! You have won !"));
 					break;
 
 				case sts::Result::LOST:
-					m_text4.setFillColor(sf::Color::Red);
-					m_text4.setString(sf::String("Too bad, maybe more luck next time ! ;)"));
+					m_opponentScore++;
+					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+					m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_resultText.setFillColor(sf::Color::Red);
+					m_resultText.setString(sf::String("Too bad, maybe more luck next time ! ;)"));
 					break;
 
 				case sts::Result::DRAW:
-					m_text4.setFillColor(sf::Color::Color(255, 165, 0, 255));
-					m_text4.setString(sf::String("DRAW"));
+					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+					m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_resultText.setFillColor(sf::Color::Color(255, 165, 0, 255));
+					m_resultText.setString(sf::String("DRAW"));
 					break;
 
 				default:
-					m_text4.setString("???");
+					m_resultText.setString("???");
 					break;
 				}
 			}
-			m_window.clear();
-			m_window.draw(m_text4);
-			m_window.display();
-		}
-			break;
-		default:
-		{
-			m_text1.setFillColor(sf::Color::Red);
-			m_text1.setCharacterSize(50);
-			m_text1.setString(sf::String("Something went wrong..."));
+
+			m_actionText.setString("Press ENTER to replay");
+			m_actionText.setColor(sf::Color::White);
+			m_actionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.2f));
 
 			m_window.clear();
-			m_window.draw(m_text1);
+			m_window.draw(m_infoText);
+			m_window.draw(m_scoreText);
+			m_window.draw(m_actionText);
+			m_window.draw(m_resultText);
+			m_window.draw(m_opponentActionText);
+			m_window.display();
+
+			
+		}
+			break;
+		case sts::ClientState::REPLAY:
+
+			if (m_shouldSendPacket && m_socket.send(m_packet) == sf::Socket::Done)
+			{
+				m_clientState = sts::ClientState::INIT;
+				m_gamePacket.action = sts::PlayerAction::NONE;
+				m_shouldSendPacket = false;
+				m_actionDone = false;
+				m_packet.clear();
+				std::cout << "Client REPLAY packet sent\n";
+			}
+
+		default:
+		{
+			m_connectionText.setFillColor(sf::Color::Red);
+			m_connectionText.setCharacterSize(50);
+			m_connectionText.setString(sf::String("Something went wrong..."));
+
+			m_window.clear();
+			m_window.draw(m_connectionText);
 			m_window.display();
 		}
 			break;
