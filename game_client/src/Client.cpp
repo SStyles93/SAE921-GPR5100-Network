@@ -140,7 +140,6 @@ int sts::Client::Update()
 
 		switch (m_clientState)
 		{
-			//If connected pass to INIT
 		case sts::ClientState::CONNECTING_TO_SERVER:
 		{
 			sf::Socket::Status status = m_socket.connect(sf::IpAddress::getLocalAddress(), 12345);
@@ -156,7 +155,6 @@ int sts::Client::Update()
 			}
 		}
 			break;
-			//INIT and wait for packet to go to GAME
 		case sts::ClientState::INIT:
 		{
 			if (m_socket.receive(m_packet) == sf::Socket::Done)
@@ -243,24 +241,25 @@ int sts::Client::Update()
 				case sts::Result::WON:
 					m_playerScore++;
 					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
-					m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_opponentActionText.setString("You played" + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
 					m_resultText.setFillColor(sf::Color::Green);
-					m_resultText.setString(sf::String("Yay ! You have won !"));
+					m_resultText.setString("And You Won !");
 					break;
 
 				case sts::Result::LOST:
 					m_opponentScore++;
 					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
-					m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_opponentActionText.setString("You played " + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
 					m_resultText.setFillColor(sf::Color::Red);
-					m_resultText.setString(sf::String("Too bad, maybe more luck next time ! ;)"));
+					m_resultText.setString("And You Lost !");
 					break;
 
 				case sts::Result::DRAW:
 					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
-					m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					//m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_opponentActionText.setString("You played " + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
 					m_resultText.setFillColor(sf::Color::Color(255, 165, 0, 255));
-					m_resultText.setString(sf::String("DRAW"));
+					m_resultText.setString("So it's and equality");
 					break;
 
 				default:
@@ -280,12 +279,11 @@ int sts::Client::Update()
 			m_window.draw(m_resultText);
 			m_window.draw(m_opponentActionText);
 			m_window.display();
-
 			
 		}
 			break;
 		case sts::ClientState::REPLAY:
-
+		{
 			if (m_shouldSendPacket && m_socket.send(m_packet) == sf::Socket::Done)
 			{
 				m_clientState = sts::ClientState::INIT;
@@ -295,7 +293,8 @@ int sts::Client::Update()
 				m_packet.clear();
 				std::cout << "Client REPLAY packet sent\n";
 			}
-
+		}
+			break;
 		default:
 		{
 			m_connectionText.setFillColor(sf::Color::Red);
