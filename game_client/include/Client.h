@@ -80,6 +80,14 @@ namespace sts
 		/// Sets the position of Texts
 		/// </summary>
 		void SetTextPosition();
-
+		/// <summary>
+		/// Sets the action to be sent
+		/// </summary>
+		/// <param name="action">The desired action to send</param>
+		void SetAction(sts::PlayerAction action);
+		/// <summary>
+		/// Updates results
+		/// </summary>
+		void UpdateResult();
 	};
 }
