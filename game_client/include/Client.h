@@ -50,7 +50,7 @@ namespace sts
 		sf::Text m_resultText;
 		sf::Text m_opponentActionText;
 
-		sf::Event m_event;
+		sf::Event m_event = sf::Event{};
 
 		bool m_playerHasHand = true;
 		bool m_shouldSendPacket = false;
@@ -58,6 +58,28 @@ namespace sts
 
 		int m_playerScore = 0;
 		int m_opponentScore = 0;
+		
+		/// <summary>
+		/// Initialises the Texts
+		/// </summary>
+		void InitText();
+		/// <summary>
+		/// Initialises the Texts fonts
+		/// </summary>
+		void InitFont();
+		/// <summary>
+		/// Sets the Texts size
+		/// <param name="size">The desired size of texts</param>
+		/// </summary>
+		void SetTextSize(unsigned int size);
+		/// <summary>
+		/// Sets the Colours of the Texts
+		/// </summary>
+		void SetTextColour();
+		/// <summary>
+		/// Sets the position of Texts
+		/// </summary>
+		void SetTextPosition();
 
 	};
 }

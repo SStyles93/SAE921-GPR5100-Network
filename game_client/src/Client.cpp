@@ -2,8 +2,52 @@
 
 
 sts::Client::Client(){}
-
 sts::Client::~Client(){}
+
+void sts::Client::InitFont() 
+{
+	m_infoText.setFont(m_font);
+	m_connectionText.setFont(m_font);
+	m_scoreText.setFont(m_font);
+	m_actionText.setFont(m_font);
+	m_opponentActionText.setFont(m_font);
+	m_resultText.setFont(m_font);
+
+}
+void sts::Client::SetTextSize(unsigned int size) 
+{
+	m_infoText.setCharacterSize(size);
+	m_connectionText.setCharacterSize(size);
+	m_scoreText.setCharacterSize(size);
+	m_actionText.setCharacterSize(size);
+	m_opponentActionText.setCharacterSize(size);
+	m_resultText.setCharacterSize(size);
+}
+void sts::Client::SetTextColour() 
+{
+	m_infoText.setFillColor(sf::Color::White);
+	m_connectionText.setFillColor(sf::Color::White);
+	m_scoreText.setFillColor(sf::Color::White);
+	m_actionText.setFillColor(sf::Color::Red);
+	m_opponentActionText.setFillColor(sf::Color::White);
+}
+void sts::Client::SetTextPosition() 
+{
+	m_infoText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
+	m_connectionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
+	m_scoreText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.1f));
+	m_actionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.2f));
+	m_opponentActionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.3f));
+	m_resultText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.4f));
+}
+void sts::Client::InitText() 
+{
+	InitFont();
+	SetTextSize(50);
+	SetTextColour();
+	SetTextPosition();
+	m_infoText.setString("You are playing ROCK-PAPER-CISORS-HAND");
+}
 
 void sts::Client::Init() 
 {
@@ -21,39 +65,9 @@ void sts::Client::Init()
 		std::cerr << "Can't find font.\n";
 	}
 
-	//Init texts
-	m_infoText.setFont(m_font);
-	m_infoText.setFillColor(sf::Color::White);
-	m_infoText.setCharacterSize(50);
-	m_infoText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
-	m_infoText.setString("You are playing ROCK-PAPER-CISORS-HAND");
-
-	m_connectionText.setFont(m_font);
-	m_connectionText.setFillColor(sf::Color::White);
-	m_connectionText.setCharacterSize(50);
-	m_connectionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.0f));
-
-	m_scoreText.setFont(m_font);
-	m_scoreText.setFillColor(sf::Color::White);
-	m_scoreText.setCharacterSize(50);
-	m_scoreText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.1f));
-
-	m_actionText.setFont(m_font);
-	m_actionText.setFillColor(sf::Color::Red);
-	m_actionText.setCharacterSize(50);
-	m_actionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.2f));
-
-	m_opponentActionText.setFont(m_font);
-	m_opponentActionText.setFillColor(sf::Color::White);
-	m_opponentActionText.setCharacterSize(50);
-	m_opponentActionText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.3f));
-
-	m_resultText.setFont(m_font);
-	m_resultText.setCharacterSize(50);
-	m_resultText.setPosition(sf::Vector2f(m_window.getSize().x * 0.0f, m_window.getSize().y * 0.4f));
+	InitText();
 
 }
-
 int sts::Client::Update() 
 {
 	while (m_window.isOpen())
@@ -69,8 +83,10 @@ int sts::Client::Update()
 			if (m_event.type == sf::Event::Resized)
 			{
 				auto view = m_window.getView();
-				view.setSize(m_event.size.width, m_event.size.height);
+				view.setSize(m_window.getSize().x, m_window.getSize().y);
 				m_window.setView(view);
+				SetTextPosition();
+
 			}
 			if (m_event.type == sf::Event::KeyPressed)
 			{
