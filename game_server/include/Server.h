@@ -26,15 +26,14 @@ namespace sts
 
 		//Listener listens to incomming connections
 		sf::TcpListener m_listener;
-
 		//Clients
 		std::array<sf::TcpSocket, 2> m_clients{};
-
 		//Selector
 		sf::SocketSelector m_selector;
-
 		//Client count to assign IDs to clients
 		int m_clientCount = 0;
+		//Number of packets received
+		int m_receptionCount = 0;
 		
 		//State of the server at the begining
 		sts::ServerState m_serverState = sts::ServerState::WAITING_FOR_PLAYERS;
@@ -52,7 +51,6 @@ namespace sts
 		sts::PlayerAction m_p1Action = sts::PlayerAction::NONE;
 		//The actions of the players 2
 		sts::PlayerAction m_p2Action = sts::PlayerAction::NONE;
-		
 		//The results of the players 1
 		sts::Result m_p1Result = sts::Result::NONE;
 		//The results of the players 2
@@ -62,9 +60,6 @@ namespace sts
 		bool m_p1HandState = true;
 		//Hand states of the player 2
 		bool m_p2HandState = true;
-		
-		//Number of packets received
-		int m_receptionCount = 0;
 		
 		/// <summary>
 		/// Listens & connects clients

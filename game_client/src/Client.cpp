@@ -171,12 +171,12 @@ int sts::Client::Update()
 		{
 			if (m_socket.receive(m_packet) == sf::Socket::Done)
 			{
-				m_packet >> m_receivedPacket;
-				if (m_receivedPacket.type == sts::PacketType::INIT)
+				m_packet >> m_statePacket;
+				if (m_statePacket.type == sts::PacketType::INIT)
 				{
 					m_clientState = sts::ClientState::GAME;
 					//RESET receivedPacket
-					m_receivedPacket.type = sts::PacketType::NONE;
+					m_statePacket.type = sts::PacketType::NONE;
 				}
 				std::cout << "Client INIT received\n";
 			}
@@ -228,8 +228,8 @@ int sts::Client::Update()
 
 			if (m_socket.receive(m_packet) == sf::Socket::Done)
 			{
-				m_packet >> m_receivedPacket;
-				if (m_receivedPacket.type == sts::PacketType::GAME)
+				m_packet >> m_statePacket;
+				if (m_statePacket.type == sts::PacketType::GAME)
 				{
 					m_clientState = sts::ClientState::END;
 					m_shouldSendPacket = true;
