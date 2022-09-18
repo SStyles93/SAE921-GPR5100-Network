@@ -52,6 +52,9 @@ namespace sts
 		//The results of the players 1&2
 		sts::Result m_p1Result = sts::Result::NONE;
 		sts::Result m_p2Result = sts::Result::NONE;
+
+		bool m_p1HandState = true;
+		bool m_p2HandState = true;
 		
 		//Number of packets received
 		int m_receptionCount = 0;
@@ -65,7 +68,8 @@ namespace sts
 		/// <param name="player2Result">The first player's result (sts::Result)</param>
 		void GameSolver(
 			sts::PlayerAction player1Action, sts::PlayerAction player2Action, 
-			sts::Result& player1Result, sts::Result& player2Result);
+			sts::Result& player1Result, sts::Result& player2Result,
+			bool& p1HandState, bool& p2HandState);
 	};
 }
 

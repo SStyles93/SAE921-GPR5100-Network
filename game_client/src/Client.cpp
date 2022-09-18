@@ -194,8 +194,16 @@ int sts::Client::Update()
 			}
 			else
 			{
-				//Draw instructions
-				m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n");
+				if (m_playerHasHand) 
+				{
+					//Draw instructions
+					m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n");
+				}
+				else 
+				{
+					m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]STUMP\n");
+				}
+				
 			}
 
 			m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
@@ -234,7 +242,13 @@ int sts::Client::Update()
 				m_packet >> m_endPacket;
 				m_otherPlayersAction = m_endPacket.opponentAction;
 				m_result = m_endPacket.result;
+				m_playerHasHand = m_endPacket.hasHand;
 				std::cout << "Client END received\n";
+
+				if (!m_playerHasHand) 
+				{
+					m_infoText.setString("You are playing ROCK-PAPER-CISORS-STUMP");
+				}
 
 				switch (m_result)
 				{

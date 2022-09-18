@@ -3,7 +3,10 @@
 sts::Server::Server() {}
 sts::Server::~Server() {}
 
-void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction player2Action, sts::Result& player1Result, sts::Result& player2Result)
+void sts::Server::GameSolver(
+	sts::PlayerAction player1Action, sts::PlayerAction player2Action,
+	sts::Result& player1Result, sts::Result& player2Result,
+	bool& p1HandState, bool& p2HandState)
 {
 	switch (player1Action)
 	{
@@ -75,10 +78,13 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		case sts::PlayerAction::CISORS:
 			player1Result = sts::Result::DRAW;
 			player2Result = sts::Result::DRAW;
+			m_p1HandState = false;
+			m_p2HandState = false;
 			break;
 		case sts::PlayerAction::HAND:
 			player1Result = sts::Result::WON;
 			player2Result = sts::Result::LOST;
+			p2HandState = false;
 			break;
 		case sts::PlayerAction::STUMP:
 			player1Result = sts::Result::LOST;
@@ -102,6 +108,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		case sts::PlayerAction::CISORS:
 			player1Result = sts::Result::LOST;
 			player2Result = sts::Result::WON;
+			p1HandState = false;
 			break;
 		case sts::PlayerAction::HAND:
 			player1Result = sts::Result::DRAW;
@@ -288,11 +295,12 @@ int sts::Server::Update()
 				if (m_receptionCount >= 2)
 				{
 					//RESOLVE THE ACTIONS
-					GameSolver(m_p1Action, m_p2Action, m_p1Result, m_p2Result);
+					GameSolver(m_p1Action, m_p2Action, m_p1Result, m_p2Result, m_p1HandState, m_p2HandState);
 
 					m_packet.clear();
 					m_endPacket.result = m_p1Result;
 					m_endPacket.opponentAction = m_p2Action;
+					m_endPacket.hasHand = m_p1HandState;
 					m_packet << m_endPacket;
 					if (m_clients[0].send(m_packet) == sf::Socket::Done)
 					{
@@ -302,6 +310,7 @@ int sts::Server::Update()
 					m_packet.clear();
 					m_endPacket.result = m_p2Result;
 					m_endPacket.opponentAction = m_p1Action;
+					m_endPacket.hasHand = m_p2HandState;
 					m_packet << m_endPacket;
 					if (m_clients[1].send(m_packet) == sf::Socket::Done)
 					{

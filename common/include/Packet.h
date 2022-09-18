@@ -43,6 +43,7 @@ namespace sts
 
 		sts::Result result = sts::Result::NONE;
 		sts::PlayerAction opponentAction = sts::PlayerAction::NONE;
+		bool hasHand = true;
 	};
 	sf::Packet& operator <<(sf::Packet& packet, const EndPacket& p);
 	sf::Packet& operator >>(sf::Packet& packet, EndPacket& p);

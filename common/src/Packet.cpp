@@ -45,15 +45,19 @@ sf::Packet& sts::operator <<(sf::Packet& packet, const sts::EndPacket& p)
 {
 	const auto state = static_cast<int>(p.result);
 	const auto action = static_cast<int>(p.opponentAction);
-	return packet << state << action;
+	const auto hasHand = p.hasHand;
+	return packet << state << action << hasHand;
 }
 sf::Packet& sts::operator >>(sf::Packet& packet, sts::EndPacket& p)
 {
 	int state = 0;
 	int opponentAction = 0;
+	bool hasHand = true;
 	packet >> state;
 	packet >> opponentAction;
+	packet >> hasHand;
 	p.result = static_cast<sts::Result>(state);
 	p.opponentAction = static_cast<sts::PlayerAction>(opponentAction);
+	p.hasHand = hasHand;
 	return packet;
 }
