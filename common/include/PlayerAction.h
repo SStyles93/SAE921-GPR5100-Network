@@ -7,7 +7,7 @@ namespace sts
 		NONE,
 		ROCK,
 		PAPER,
-		CISORS,
+		SCISSORS,
 		HAND,
 		STUMP,
 	};
@@ -22,7 +22,7 @@ namespace sts
 			return "ROCK";
 		case PlayerAction::PAPER:
 			return "PAPER";
-		case PlayerAction::CISORS:
+		case PlayerAction::SCISSORS:
 			return "CISORS";
 		case PlayerAction::HAND:
 			return "HAND";

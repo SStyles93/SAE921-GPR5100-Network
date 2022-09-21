@@ -3,57 +3,10 @@
 sts::Server::Server() {}
 sts::Server::~Server() {}
 
-void sts::Server::ConnectClients() 
-{
-	if (m_listener.accept(m_clients[0]) == sf::Socket::Done)
-	{
-		m_selector.add(m_clients[0]);
-		m_clientCount++;
-		std::cout << "Connection established with: " << m_clients[0].getRemoteAddress() << " as clients[0]." << std::endl;
-	}
-	if (m_listener.accept(m_clients[1]) == sf::Socket::Done)
-	{
-		m_selector.add(m_clients[1]);
-		m_clientCount++;
-		std::cout << "Connection established with: " << m_clients[1].getRemoteAddress() << " as clients[1]." << std::endl;
-	}
-}
-void sts::Server::SendStatePackets(sts::PacketType type) 
-{
-	m_gameStatePacket.type = type;
-	
-	m_packet.clear();
-	m_packet << m_gameStatePacket;
-	if (m_clients[0].send(m_packet) == sf::Socket::Done)
-	{
-		std::cout << "Server " << StateToString(m_serverState) << " package sent\n";
-	}
-	m_packet.clear();
-	m_packet << m_gameStatePacket;
-	if (m_clients[1].send(m_packet) == sf::Socket::Done)
-	{
-		std::cout << "Server" << StateToString(m_serverState) << " package sent\n";
-	}
-}
-void sts::Server::ReceiveAction(int clientId, sts::PlayerAction action) 
-{
-	if (m_clients[clientId].receive(m_packet) == sf::Socket::Done)
-	{
-		m_packet >> m_gamePacket;
-		action = m_gamePacket.action;
-
-		std::cout << "Server "<< StateToString(m_serverState)<< " received\n";
-	}
-}
-void sts::Server::ReceiveValidation(int clientIndex)
-{
-	if (m_clients[clientIndex].receive(m_packet) == sf::Socket::Done)
-	{
-		m_packet.clear();
-		std::cout << "Server "<< StateToString(m_serverState) << " received\n";
-	}
-}
-void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction player2Action, sts::Result& player1Result, sts::Result& player2Result,bool& p1HandState, bool& p2HandState)
+void sts::Server::GameSolver(
+	sts::PlayerAction player1Action, sts::PlayerAction player2Action, 
+	sts::Result& player1Result, sts::Result& player2Result,
+	bool& p1HandState, bool& p2HandState)
 {
 	switch (player1Action)
 	{
@@ -68,7 +21,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 			player1Result = sts::Result::LOST;
 			player2Result = sts::Result::WON;
 			break;
-		case sts::PlayerAction::CISORS:
+		case sts::PlayerAction::SCISSORS:
 			player1Result = sts::Result::WON;
 			player2Result = sts::Result::LOST;
 			break;
@@ -95,7 +48,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 			player1Result = sts::Result::DRAW;
 			player2Result = sts::Result::DRAW;
 			break;
-		case sts::PlayerAction::CISORS:
+		case sts::PlayerAction::SCISSORS:
 			player1Result = sts::Result::LOST;
 			player2Result = sts::Result::WON;
 			break;
@@ -111,7 +64,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 			break;
 		}
 		break;
-	case sts::PlayerAction::CISORS:
+	case sts::PlayerAction::SCISSORS:
 		switch (player2Action)
 		{
 		case sts::PlayerAction::ROCK:
@@ -122,7 +75,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 			player1Result = sts::Result::WON;
 			player2Result = sts::Result::LOST;
 			break;
-		case sts::PlayerAction::CISORS:
+		case sts::PlayerAction::SCISSORS:
 			player1Result = sts::Result::DRAW;
 			player2Result = sts::Result::DRAW;
 			m_p1HandState = false;
@@ -152,7 +105,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 			player1Result = sts::Result::WON;
 			player2Result = sts::Result::LOST;
 			break;
-		case sts::PlayerAction::CISORS:
+		case sts::PlayerAction::SCISSORS:
 			player1Result = sts::Result::LOST;
 			player2Result = sts::Result::WON;
 			p1HandState = false;
@@ -180,7 +133,7 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 			player1Result = sts::Result::LOST;
 			player2Result = sts::Result::WON;
 			break;
-		case sts::PlayerAction::CISORS:
+		case sts::PlayerAction::SCISSORS:
 			player1Result = sts::Result::WON;
 			player2Result = sts::Result::LOST;
 			break;
@@ -198,26 +151,22 @@ void sts::Server::GameSolver(sts::PlayerAction player1Action, sts::PlayerAction 
 		break;
 	}
 }
-void sts::Server::SendResolution() 
+void sts::Server::SendStatePacket(sts::PacketType type) 
 {
-	m_packet.clear();
-	m_endPacket.result = m_p1Result;
-	m_endPacket.opponentAction = m_p2Action;
-	m_endPacket.hasHand = m_p1HandState;
-	m_packet << m_endPacket;
-	if (m_clients[0].send(m_packet) == sf::Socket::Done)
+	m_gameStatePacket.type = type;
+
+	m_statePacket.clear();
+	m_statePacket << m_gameStatePacket;
+	if (m_clients[0].send(m_statePacket) == sf::Socket::Done)
 	{
-		std::cout << "Server " << StateToString(m_serverState)<< " sent\n";
+		std::cout << "Server" << StateToString(m_serverState) << " package sent\n";
 	}
 
-	m_packet.clear();
-	m_endPacket.result = m_p2Result;
-	m_endPacket.opponentAction = m_p1Action;
-	m_endPacket.hasHand = m_p2HandState;
-	m_packet << m_endPacket;
-	if (m_clients[1].send(m_packet) == sf::Socket::Done)
+	m_statePacket.clear();
+	m_statePacket << m_gameStatePacket;
+	if (m_clients[1].send(m_statePacket) == sf::Socket::Done)
 	{
-		std::cout << "Server " << StateToString(m_serverState) << " sent\n";
+		std::cout << "Server " << StateToString(m_serverState) << " package sent\n";
 	}
 }
 void sts::Server::ResetGame() 
@@ -248,88 +197,157 @@ int sts::Server::Update()
 				// Test the listener
 				if (m_selector.isReady(m_listener))
 				{
-					ConnectClients();
+					// The listener is ready: there is a pending connection
+					if (m_listener.accept(m_clients[0]) == sf::Socket::Done)
+					{
+						// Add the new client to the selector so that we will
+						// be notified when he sends something
+						m_selector.add(m_clients[0]);
+						m_clientCount++;
+						std::cout << "Connection established with: " << m_clients[0].getRemoteAddress() << " as clients[0]." << std::endl;
+					}
+					if (m_listener.accept(m_clients[1]) == sf::Socket::Done)
+					{
+						m_selector.add(m_clients[1]);
+						m_clientCount++;
+						std::cout << "Connection established with: " << m_clients[1].getRemoteAddress() << " as clients[1]." << std::endl;
+					}
 
 					if (m_clientCount >= 2) 
 					{
-						SendStatePackets(sts::PacketType::INIT);
+						SendStatePacket(sts::PacketType::INIT);
 						m_serverState = sts::ServerState::PLAYERS_MOVE;
 					}
 				}
 				break;
 
 			case sts::ServerState::PLAYERS_MOVE:
-				for (std::size_t client = 0; client < m_clients.size(); client++)
+				for (std::size_t i = 0; i < m_clients.size(); i++)
 				{
-					if (!m_selector.isReady(m_clients[client])) continue;
+					if (!m_selector.isReady(m_clients[i])) continue;
 
-					if (client == 0)
+					if (i == 0)
 					{
-						ReceiveAction(client, m_p1Action);
-						m_receptionCount++;
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet >> m_gamePacket;
+							m_p1Action = m_gamePacket.action;
+							m_receptionCount++;
+
+							std::cout << "Server PLAYER_MOVE received\n";
+
+						}
 					}
-					else if (client == 1)
+					else if (i == 1)
 					{
-						ReceiveAction(client, m_p2Action);
-						m_receptionCount++;
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet >> m_gamePacket;
+							m_p2Action = m_gamePacket.action;
+							m_receptionCount++;
+
+							std::cout << "Server PLAYER_MOVE received\n";
+
+						}
 					}
 				}
 				if (m_receptionCount >= 2)
 				{
-					m_receptionCount = 0;
-					SendStatePackets(sts::PacketType::GAME);
+					SendStatePacket(sts::PacketType::GAME);
+
 					m_serverState = sts::ServerState::RESOLVING;
+					m_receptionCount = 0;
 				}
 				break;
 
 			case sts::ServerState::RESOLVING:
 
-				for (std::size_t client = 0; client < m_clients.size(); client++)
-				{
-					if (!m_selector.isReady(m_clients[client])) continue;
 
-					if (client == 0)
+				for (std::size_t i = 0; i < m_clients.size(); i++)
+				{
+					if (!m_selector.isReady(m_clients[i])) continue;
+					if (i == 0)
 					{
-						ReceiveValidation(client);
-						m_receptionCount++;
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet.clear();
+							m_receptionCount++;
+							std::cout << "Server RESOLVING received\n";
+						}
 					}
-					else if (client == 1)
+					else if (i == 1)
 					{
-						ReceiveValidation(client);
-						m_receptionCount++;
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet.clear();
+							m_receptionCount++;
+							std::cout << "Server RESOLVING received\n";
+
+						}
 					}
 				}
 				if (m_receptionCount >= 2)
 				{
-					m_receptionCount = 0;
+					//RESOLVE THE ACTIONS
 					GameSolver(m_p1Action, m_p2Action, m_p1Result, m_p2Result, m_p1HandState, m_p2HandState);
-					SendResolution();
+
+					m_packet.clear();
+					m_endPacket.result = m_p1Result;
+					m_endPacket.opponentAction = m_p2Action;
+					m_endPacket.hasHand = m_p1HandState;
+					m_packet << m_endPacket;
+					if (m_clients[0].send(m_packet) == sf::Socket::Done)
+					{
+						std::cout << "Server RESOLVING sent\n";
+					}
+
+					m_packet.clear();
+					m_endPacket.result = m_p2Result;
+					m_endPacket.opponentAction = m_p1Action;
+					m_endPacket.hasHand = m_p2HandState;
+					m_packet << m_endPacket;
+					if (m_clients[1].send(m_packet) == sf::Socket::Done)
+					{
+						std::cout << "Server RESOLVING sent\n";
+					}
+
 					m_serverState = sts::ServerState::END;
+					m_receptionCount = 0;
 				}
 				break;
 
 			case sts::ServerState::END:
 
-				for (std::size_t client = 0; client < m_clients.size(); client++)
+				for (std::size_t i = 0; i < m_clients.size(); i++)
 				{
-					if (!m_selector.isReady(m_clients[client])) continue;
-					if (client == 0)
+					if (!m_selector.isReady(m_clients[i])) continue;
+					if (i == 0)
 					{
-						ReceiveValidation(client);
-						m_receptionCount++;
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet.clear();
+							m_receptionCount++;
+							std::cout << "Server END received\n";
+						}
 					}
-					else if (client == 1)
+					else if (i == 1)
 					{
-						ReceiveValidation(client);
-						m_receptionCount++;
+						if (m_clients[i].receive(m_packet) == sf::Socket::Done)
+						{
+							m_packet.clear();
+							m_receptionCount++;
+							std::cout << "Server END received\n";
+
+						}
 					}
 				}
 				if (m_receptionCount >= 2) 
 				{
-					m_receptionCount = 0;
-					SendStatePackets(sts::PacketType::INIT);
+					SendStatePacket(sts::PacketType::INIT);
 					ResetGame();
+
 					m_serverState = sts::ServerState::PLAYERS_MOVE;
+					m_receptionCount = 0;
 				}
 
 				break;

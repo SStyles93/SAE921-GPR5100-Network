@@ -28,6 +28,7 @@ namespace sts
 		sf::TcpListener m_listener;
 		//Clients
 		std::array<sf::TcpSocket, 2> m_clients{};
+		
 		//Selector
 		sf::SocketSelector m_selector;
 		//Client count to assign IDs to clients
@@ -40,17 +41,16 @@ namespace sts
 
 		//Packet needed to transmit/receive data
 		sf::Packet m_packet;
-		//Packet used to send game states
+		sf::Packet m_statePacket;
 		sts::Packet m_gameStatePacket;
-		//Packet used to send actions
 		sts::GamePacket m_gamePacket;
-		//Packet used to send end game informations
 		sts::EndPacket m_endPacket;
 
 		//The actions of the players 1
 		sts::PlayerAction m_p1Action = sts::PlayerAction::NONE;
 		//The actions of the players 2
 		sts::PlayerAction m_p2Action = sts::PlayerAction::NONE;
+
 		//The results of the players 1
 		sts::Result m_p1Result = sts::Result::NONE;
 		//The results of the players 2
@@ -62,36 +62,21 @@ namespace sts
 		bool m_p2HandState = true;
 		
 		/// <summary>
-		/// Listens & connects clients
-		/// </summary>
-		void ConnectClients();
-		/// <summary>
-		/// Sends the initiation packets to clients
-		/// </summary>
-		void SendStatePackets(sts::PacketType type);
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="clientId"></param>
-		/// <param name="action"></param>
-		void ReceiveAction(int clientIndex, sts::PlayerAction action);
-		/// <summary>
-		/// Receive validation from clients to pass to next server state
-		/// </summary>
-		/// <param name="clientId">The index of the client from whom the server receives data</param>
-		void ReceiveValidation(int clientIndex);
-		/// <summary>
 		/// Gives the results according to actions received
 		/// </summary>
 		/// <param name="player1Action">The first player's action </param>
 		/// <param name="player2Action">The second player's action </param>
 		/// <param name="player1Result">The first player's result </param>
 		/// <param name="player2Result">The first player's result </param>
-		void GameSolver(sts::PlayerAction player1Action, sts::PlayerAction player2Action, sts::Result& player1Result, sts::Result& player2Result,bool& p1HandState, bool& p2HandState);
+		void GameSolver(
+			sts::PlayerAction player1Action, sts::PlayerAction player2Action, 
+			sts::Result& player1Result, sts::Result& player2Result,
+			bool& p1HandState, bool& p2HandState);
+
 		/// <summary>
-		/// Send to clients the results of the game
+		/// Sends the initiation packet
 		/// </summary>
-		void SendResolution();
+		void SendStatePacket(sts::PacketType type);
 		/// <summary>
 		/// Reset values of game
 		/// </summary>

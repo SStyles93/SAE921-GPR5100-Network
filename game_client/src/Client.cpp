@@ -49,19 +49,6 @@ void sts::Client::InitText()
 	m_infoText.setString("You are playing ROCK-PAPER-CISORS-HAND");
 }
 
-void sts::Client::SetAction(sts::PlayerAction action) 
-{
-	m_packet.clear();
-	m_gamePacket.action = action;
-	m_packet << m_gamePacket;
-	m_shouldSendPacket = true;
-}
-void sts::Client::UpdateResult() 
-{
-	m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
-	m_opponentActionText.setString("You played" + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
-}
-
 void sts::Client::Init() 
 {
 	//set socket to non blocking
@@ -87,6 +74,7 @@ int sts::Client::Update()
 	{
 		while (m_window.pollEvent(m_event))
 		{
+			// Windows events -------------------------------------------------------------------------------
 			if (m_event.type == sf::Event::Closed)
 			{
 				m_window.close();
@@ -98,6 +86,7 @@ int sts::Client::Update()
 				view.setSize(m_window.getSize().x, m_window.getSize().y);
 				m_window.setView(view);
 				SetTextPosition();
+
 			}
 			if (m_event.type == sf::Event::KeyPressed)
 			{
@@ -105,19 +94,28 @@ int sts::Client::Update()
 				{
 					if (m_event.key.code == sf::Keyboard::Num1)
 					{
-						SetAction(sts::PlayerAction::ROCK);
+						m_packet.clear();
+						m_gamePacket.action = sts::PlayerAction::ROCK;
+						m_packet << m_gamePacket;
+						m_shouldSendPacket = true;
 						m_actionText.setString("You have played ROCK");
 						std::cout << "Key 1 Pressed! " << std::endl;
 					}
 					if (m_event.key.code == sf::Keyboard::Num2)
 					{
-						SetAction(sts::PlayerAction::PAPER);
+						m_packet.clear();
+						m_gamePacket.action = sts::PlayerAction::PAPER;
+						m_packet << m_gamePacket;
+						m_shouldSendPacket = true;
 						m_actionText.setString("You have played PAPER");
 						std::cout << "Key 2 Pressed! " << std::endl;
 					}
 					if (m_event.key.code == sf::Keyboard::Num3)
 					{
-						SetAction(sts::PlayerAction::CISORS);
+						m_packet.clear();
+						m_gamePacket.action = sts::PlayerAction::SCISSORS;
+						m_packet << m_gamePacket;
+						m_shouldSendPacket = true;
 						m_actionText.setString("You have played CISORS");
 						std::cout << "Key 3 Pressed! " << std::endl;
 					}
@@ -125,13 +123,19 @@ int sts::Client::Update()
 					{
 						if (m_playerHasHand)
 						{
-							SetAction(sts::PlayerAction::HAND);
+							m_packet.clear();
+							m_gamePacket.action = sts::PlayerAction::HAND;
+							m_packet << m_gamePacket;
+							m_shouldSendPacket = true;
 							m_actionText.setString("You have played HAND");
 							std::cout << "Key 4 Pressed! " << std::endl;
 						}
 						else
 						{
-							SetAction(sts::PlayerAction::STUMP);
+							m_packet.clear();
+							m_gamePacket.action = sts::PlayerAction::STUMP;
+							m_packet << m_gamePacket;
+							m_shouldSendPacket = true;
 							m_actionText.setString("You have played STUMP");
 							std::cout << "Key 4 Pressed! " << std::endl;
 						}
@@ -154,7 +158,12 @@ int sts::Client::Update()
 		{
 		case sts::ClientState::CONNECTING_TO_SERVER:
 		{
-			sf::Socket::Status status = m_socket.connect(sf::IpAddress::getLocalAddress(), 12345);
+			std::string sentence;
+			std::cout << "Enter the servers IP Adress: "; std::cout.flush();
+			std::getline(std::cin, sentence);
+			m_serverAdress = sentence;
+
+			sf::Socket::Status status = m_socket.connect(m_serverAdress, 12345);
 
 			if (status == sf::Socket::Done || status == sf::Socket::NotReady)
 			{
@@ -208,11 +217,12 @@ int sts::Client::Update()
 			{
 				if (m_playerHasHand) 
 				{
-					m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]HAND\n");
+					//Draw instructions
+					m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]SCISSORS\n [4]HAND\n");
 				}
 				else 
 				{
-					m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]CISORS\n [4]STUMP\n");
+					m_actionText.setString("Please select your move :\n [1]ROCK\n [2]PAPER\n [3]SCISSORS\n [4]STUMP\n");
 				}
 				
 			}
@@ -258,27 +268,31 @@ int sts::Client::Update()
 
 				if (!m_playerHasHand) 
 				{
-					m_infoText.setString("You are playing ROCK-PAPER-CISORS-STUMP");
+					m_infoText.setString("You are playing ROCK-PAPER-SCISSORS-STUMP");
 				}
 
 				switch (m_result)
 				{
 				case sts::Result::WON:
 					m_playerScore++;
-					UpdateResult();
+					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+					m_opponentActionText.setString("You played" + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
 					m_resultText.setFillColor(sf::Color::Green);
 					m_resultText.setString("And You Won !");
 					break;
 
 				case sts::Result::LOST:
 					m_opponentScore++;
-					UpdateResult();
+					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+					m_opponentActionText.setString("You played " + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
 					m_resultText.setFillColor(sf::Color::Red);
 					m_resultText.setString("And You Lost !");
 					break;
 
 				case sts::Result::DRAW:
-					UpdateResult();
+					m_scoreText.setString("The current score is: Player: " + std::to_string(m_playerScore) + " | Opponent: " + std::to_string(m_opponentScore));
+					//m_opponentActionText.setString("Your opponent played " + std::to_string(static_cast<int>(m_otherPlayersAction)));
+					m_opponentActionText.setString("You played " + ActionToString(m_gamePacket.action) + "\nYour opponent played " + sts::ActionToString(m_otherPlayersAction));
 					m_resultText.setFillColor(sf::Color::Color(255, 165, 0, 255));
 					m_resultText.setString("So it's and equality");
 					break;

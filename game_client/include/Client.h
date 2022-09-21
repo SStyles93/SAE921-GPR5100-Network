@@ -28,6 +28,9 @@ namespace sts
 
 	private:
 
+		//Server's ip adress
+		sf::IpAddress m_serverAdress = sf::IpAddress::getLocalAddress();
+
 		//The client's socket
 		sf::TcpSocket m_socket;
 		
@@ -102,14 +105,6 @@ namespace sts
 		/// Sets the position of Texts
 		/// </summary>
 		void SetTextPosition();
-		/// <summary>
-		/// Sets the action to be sent
-		/// </summary>
-		/// <param name="action">The desired action to send</param>
-		void SetAction(sts::PlayerAction action);
-		/// <summary>
-		/// Updates results
-		/// </summary>
-		void UpdateResult();
+
 	};
 }
