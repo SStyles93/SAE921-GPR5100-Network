@@ -28,6 +28,28 @@ namespace sts
 
 	private:
 
+		/// <summary>
+		/// Initialises the Texts
+		/// </summary>
+		void InitText();
+		/// <summary>
+		/// Initialises the Texts fonts
+		/// </summary>
+		void InitFont();
+		/// <summary>
+		/// Sets the Texts size
+		/// <param name="size">The desired size of texts</param>
+		/// </summary>
+		void SetTextSize(unsigned int size);
+		/// <summary>
+		/// Sets the Colours of the Texts
+		/// </summary>
+		void SetTextColour();
+		/// <summary>
+		/// Sets the position of Texts
+		/// </summary>
+		void SetTextPosition();
+
 		//Server's ip adress
 		sf::IpAddress m_serverAdress = sf::IpAddress::getLocalAddress();
 
@@ -83,28 +105,5 @@ namespace sts
 		int m_playerScore = 0;
 		//The opponent's score
 		int m_opponentScore = 0;
-		
-		/// <summary>
-		/// Initialises the Texts
-		/// </summary>
-		void InitText();
-		/// <summary>
-		/// Initialises the Texts fonts
-		/// </summary>
-		void InitFont();
-		/// <summary>
-		/// Sets the Texts size
-		/// <param name="size">The desired size of texts</param>
-		/// </summary>
-		void SetTextSize(unsigned int size);
-		/// <summary>
-		/// Sets the Colours of the Texts
-		/// </summary>
-		void SetTextColour();
-		/// <summary>
-		/// Sets the position of Texts
-		/// </summary>
-		void SetTextPosition();
-
 	};
 }

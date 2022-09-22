@@ -9,7 +9,7 @@ namespace sts
 		RESOLVING,
 		END
 	};
-	static std::string StateToString(sts::ServerState state)
+	inline std::string StateToString(sts::ServerState state)
 	{
 		switch (state)
 		{

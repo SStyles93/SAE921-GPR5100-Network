@@ -17,12 +17,32 @@ namespace sts
 		/// </summary>
 		void Init();
 		/// <summary>
-		/// Runs the Server's main "loop"
+		/// Runs the Server
 		/// </summary>
-		/// <returns></returns>
-		int Update();
+		void Run();
 
 	private:
+
+		/// <summary>
+		/// Gives the results according to actions received
+		/// </summary>
+		/// <param name="player1Action">The first player's action </param>
+		/// <param name="player2Action">The second player's action </param>
+		/// <param name="player1Result">The first player's result </param>
+		/// <param name="player2Result">The first player's result </param>
+		void GameSolver(
+			sts::PlayerAction player1Action, sts::PlayerAction player2Action,
+			sts::Result& player1Result, sts::Result& player2Result,
+			bool& p1HandState, bool& p2HandState);
+
+		/// <summary>
+		/// Sends the initiation packet
+		/// </summary>
+		void SendStatePacket(sts::PacketType type);
+		/// <summary>
+		/// Reset values of game
+		/// </summary>
+		void ResetGame();
 
 		//Listener listens to incomming connections
 		sf::TcpListener m_listener;
@@ -60,27 +80,6 @@ namespace sts
 		bool m_p1HandState = true;
 		//Hand states of the player 2
 		bool m_p2HandState = true;
-		
-		/// <summary>
-		/// Gives the results according to actions received
-		/// </summary>
-		/// <param name="player1Action">The first player's action </param>
-		/// <param name="player2Action">The second player's action </param>
-		/// <param name="player1Result">The first player's result </param>
-		/// <param name="player2Result">The first player's result </param>
-		void GameSolver(
-			sts::PlayerAction player1Action, sts::PlayerAction player2Action, 
-			sts::Result& player1Result, sts::Result& player2Result,
-			bool& p1HandState, bool& p2HandState);
-
-		/// <summary>
-		/// Sends the initiation packet
-		/// </summary>
-		void SendStatePacket(sts::PacketType type);
-		/// <summary>
-		/// Reset values of game
-		/// </summary>
-		void ResetGame();
 	};
 }
 
