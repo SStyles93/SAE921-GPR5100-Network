@@ -6,7 +6,7 @@ int main()
 	sts::Client client;
 	client.Init();
 	client.Update();
-	return client.Update();
+	return EXIT_SUCCESS;
 }
 
 

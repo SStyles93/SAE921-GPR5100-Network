@@ -7,12 +7,13 @@ namespace sts
 		NONE,
 		ROCK,
 		PAPER,
-		CISORS,
+		SCISSORS,
 		HAND,
 		STUMP,
 	};
 
-	static std::string ActionToString(sts::PlayerAction action)
+
+	inline std::string ActionToString(sts::PlayerAction action)
 	{
 		switch (action) 
 		{
@@ -22,14 +23,14 @@ namespace sts
 			return "ROCK";
 		case PlayerAction::PAPER:
 			return "PAPER";
-		case PlayerAction::CISORS:
-			return "CISORS";
+		case PlayerAction::SCISSORS:
+			return "SCISSORS";
 		case PlayerAction::HAND:
 			return "HAND";
 		case PlayerAction::STUMP:
 			return "STUMP";
 		default:
-			return"No action with that name";
+			return "No action with that name";
 		}
 	}
 
